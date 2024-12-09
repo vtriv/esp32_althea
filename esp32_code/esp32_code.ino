@@ -87,11 +87,9 @@ void setup() {
   pinMode(LED_POWER, OUTPUT);
   pinMode(LED_CONNECT, OUTPUT);
   pinMode(LED_INPROGRESS, OUTPUT);
+  pinMode(SQUARE_WAVE_PIN, OUTPUT);
 
   digitalWrite(LED_POWER, HIGH); // turn on LED to indicate power to device
-
-  pinMode(SQUARE_WAVE_PIN, OUTPUT);
-  
   ledcDetach(SQUARE_WAVE_PIN);
   ledcAttach(SQUARE_WAVE_PIN, 1770000, 1);
 }
@@ -104,8 +102,10 @@ void loop() {
 
     if (state) {
       ledcWrite(SQUARE_WAVE_PIN, 1);               // Start the ultrasound signal
+      Serial.println("ultrasound should be triggered");
     } else {
       ledcWrite(SQUARE_WAVE_PIN, 0);               // Stop the ultrasound signal
+      Serial.println("ultrasound should be off");
     }
   }
   delay(10);
