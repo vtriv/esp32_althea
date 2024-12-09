@@ -7,14 +7,25 @@
 #define SERVICE_UUID        "180D"
 #define CHARACTERISTIC_UUID "2A56"
 
+#define LED_POWER           9   // led for power to device
+#define LED_CONNECT         10   // led to show device is connected
+#define LED_INPROGRESS      11   // led to show treatment in progress // RGB_BUILTIN also shows this
+#define SQUARE_WAVE_PIN     14  // output for 1.7 MHz square wave
+
+// Variables to track states
+bool state = false;            // initially off
+volatile bool updateState = false;
+
 // Callback class to handle BLE server events
 class MyServerCallbacks : public BLEServerCallbacks {
   void onConnect(BLEServer* pServer) {
     Serial.println("Device connected!");
+    digitalWrite(LED_CONNECT, HIGH);
   }
 
   void onDisconnect(BLEServer* pServer) {
     Serial.println("Device disconnected!");
+    digitalWrite(LED_CONNECT, LOW);
     // Restart advertising so other devices can connect
     pServer->getAdvertising()->start();
     Serial.println("Advertising restarted...");
@@ -27,8 +38,12 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
     // Get the value written to the characteristic
     String value = pCharacteristic->getValue();
     if (value.length() > 0) {
-      Serial.print("Received data: ");
-      Serial.println(value.c_str());
+      // Serial.print("Received data: ");
+      // Serial.println(value.c_str());
+      
+      state = !state; // Toggle state
+      updateState = true;
+      // moved rest to void loop so that it doesn't get in the way of ultrasound output
     }
   }
 };
@@ -68,9 +83,30 @@ void setup() {
   pAdvertising->start();
   
   Serial.println("BLE device is advertising as ESP32_althea...");
+
+  pinMode(LED_POWER, OUTPUT);
+  pinMode(LED_CONNECT, OUTPUT);
+  pinMode(LED_INPROGRESS, OUTPUT);
+
+  digitalWrite(LED_POWER, HIGH); // turn on LED to indicate power to device
+
+  pinMode(SQUARE_WAVE_PIN, OUTPUT);
+  
+  ledcDetach(SQUARE_WAVE_PIN);
+  ledcAttach(SQUARE_WAVE_PIN, 1770000, 1);
 }
 
 void loop() {
-  // Nothing to do in loop
-  delay(1000);
+  if (updateState) {
+    updateState = false;
+    digitalWrite(RGB_BUILTIN, state ? HIGH : LOW);
+    digitalWrite(LED_INPROGRESS, state ? HIGH : LOW);
+
+    if (state) {
+      ledcWrite(SQUARE_WAVE_PIN, 1);               // Start the ultrasound signal
+    } else {
+      ledcWrite(SQUARE_WAVE_PIN, 0);               // Stop the ultrasound signal
+    }
+  }
+  delay(10);
 }
