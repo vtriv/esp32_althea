@@ -14,6 +14,7 @@
 
 // Variables to track states
 bool state = false;            // initially off
+bool disconnectedWhileOn = false;
 
 // Callback class to handle BLE server events
 class MyServerCallbacks : public BLEServerCallbacks {
@@ -28,6 +29,10 @@ class MyServerCallbacks : public BLEServerCallbacks {
     // Restart advertising so other devices can connect
     pServer->getAdvertising()->start();
     Serial.println("Advertising restarted...");
+    // COMMENTED OUT SO THAT WE DON'T MESS WITH IT, BUT WILL NEED LATER
+    // if (state) {
+    //   disconnectedWhileOn = true; 
+    // }
     state = false;
     digitalWrite(LED_INPROGRESS, LOW);
     ledcWrite(SQUARE_WAVE_PIN, 0);
@@ -42,19 +47,21 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
     if (value.length() > 0) {
       // Serial.print("Received data: ");
       // Serial.println(value.c_str());
-      
-      state = !state; // Toggle state
-      // digitalWrite(RGB_BUILTIN, state ? HIGH : LOW);
-      digitalWrite(LED_INPROGRESS, state ? HIGH : LOW);
+      if (!disconnectedWhileOn) {
+        state = !state; // Toggle state
+        // digitalWrite(RGB_BUILTIN, state ? HIGH : LOW);
+        digitalWrite(LED_INPROGRESS, state ? HIGH : LOW);
 
-      if (state) {
-        ledcWrite(SQUARE_WAVE_PIN, 1);               // Start the ultrasound signal
-        Serial.println("ultrasound should be triggered");
+        if (state) {
+          ledcWrite(SQUARE_WAVE_PIN, 1);               // Start the ultrasound signal
+          Serial.println("ultrasound should be triggered");
+        } else {
+          ledcWrite(SQUARE_WAVE_PIN, 0);               // Stop the ultrasound signal
+          Serial.println("ultrasound should be off");
+        }
       } else {
-        ledcWrite(SQUARE_WAVE_PIN, 0);               // Stop the ultrasound signal
-        Serial.println("ultrasound should be off");
+        disconnectedWhileOn = false;
       }
-      // moved rest to void loop so that it doesn't get in the way of ultrasound output
     }
   }
 };
