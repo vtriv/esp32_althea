@@ -28,6 +28,9 @@ class MyServerCallbacks : public BLEServerCallbacks {
     // Restart advertising so other devices can connect
     pServer->getAdvertising()->start();
     Serial.println("Advertising restarted...");
+    state = false;
+    digitalWrite(LED_INPROGRESS, LOW);
+    ledcWrite(SQUARE_WAVE_PIN, 0);
   }
 };
 
@@ -41,7 +44,7 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
       // Serial.println(value.c_str());
       
       state = !state; // Toggle state
-      digitalWrite(RGB_BUILTIN, state ? HIGH : LOW);
+      // digitalWrite(RGB_BUILTIN, state ? HIGH : LOW);
       digitalWrite(LED_INPROGRESS, state ? HIGH : LOW);
 
       if (state) {
