@@ -14,7 +14,6 @@
 
 // Variables to track states
 bool state = false;            // initially off
-volatile bool updateState = false;
 
 // Callback class to handle BLE server events
 class MyServerCallbacks : public BLEServerCallbacks {
@@ -42,7 +41,9 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
       // Serial.println(value.c_str());
       
       state = !state; // Toggle state
-      updateState = true;
+      digitalWrite(RGB_BUILTIN, state ? HIGH : LOW);
+      digitalWrite(LED_INPROGRESS, state ? HIGH : LOW);
+
       if (state) {
         ledcWrite(SQUARE_WAVE_PIN, 1);               // Start the ultrasound signal
         Serial.println("ultrasound should be triggered");
@@ -102,10 +103,5 @@ void setup() {
 }
 
 void loop() {
-  if (updateState) {
-    updateState = false;
-    digitalWrite(RGB_BUILTIN, state ? HIGH : LOW);
-    digitalWrite(LED_INPROGRESS, state ? HIGH : LOW);
-  }
-  delay(10);
+  delay(1000);
 }
