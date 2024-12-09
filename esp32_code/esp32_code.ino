@@ -43,6 +43,13 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
       
       state = !state; // Toggle state
       updateState = true;
+      if (state) {
+        ledcWrite(SQUARE_WAVE_PIN, 1);               // Start the ultrasound signal
+        Serial.println("ultrasound should be triggered");
+      } else {
+        ledcWrite(SQUARE_WAVE_PIN, 0);               // Stop the ultrasound signal
+        Serial.println("ultrasound should be off");
+      }
       // moved rest to void loop so that it doesn't get in the way of ultrasound output
     }
   }
@@ -99,14 +106,6 @@ void loop() {
     updateState = false;
     digitalWrite(RGB_BUILTIN, state ? HIGH : LOW);
     digitalWrite(LED_INPROGRESS, state ? HIGH : LOW);
-
-    if (state) {
-      ledcWrite(SQUARE_WAVE_PIN, 1);               // Start the ultrasound signal
-      Serial.println("ultrasound should be triggered");
-    } else {
-      ledcWrite(SQUARE_WAVE_PIN, 0);               // Stop the ultrasound signal
-      Serial.println("ultrasound should be off");
-    }
   }
   delay(10);
 }
