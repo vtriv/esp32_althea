@@ -7,10 +7,10 @@
 #define SERVICE_UUID        "180D"
 #define CHARACTERISTIC_UUID "2A56"
 
-#define LED_POWER           9   // led for power to device
+// #define LED_POWER           9   // led for power to device
 #define LED_CONNECT         10   // led to show device is connected
-#define LED_INPROGRESS      11   // led to show treatment in progress // RGB_BUILTIN also shows this
-#define SQUARE_WAVE_PIN     14  // output for 1.7 MHz square wave
+#define LED_INPROGRESS      14   // led to show treatment in progress // RGB_BUILTIN also shows this
+// #define SQUARE_WAVE_PIN     14  // output for 1.7 MHz square wave
 
 // Variables to track states
 bool state = false;            // initially off
@@ -35,7 +35,7 @@ class MyServerCallbacks : public BLEServerCallbacks {
     // }
     state = false;
     digitalWrite(LED_INPROGRESS, LOW);
-    ledcWrite(SQUARE_WAVE_PIN, 0);
+    // ledcWrite(SQUARE_WAVE_PIN, 0);
   }
 };
 
@@ -52,13 +52,13 @@ class MyCharacteristicCallbacks : public BLECharacteristicCallbacks {
         // digitalWrite(RGB_BUILTIN, state ? HIGH : LOW);
         digitalWrite(LED_INPROGRESS, state ? HIGH : LOW);
 
-        if (state) {
-          ledcWrite(SQUARE_WAVE_PIN, 1);               // Start the ultrasound signal
-          Serial.println("ultrasound should be triggered");
-        } else {
-          ledcWrite(SQUARE_WAVE_PIN, 0);               // Stop the ultrasound signal
-          Serial.println("ultrasound should be off");
-        }
+        // if (state) {
+        //   ledcWrite(SQUARE_WAVE_PIN, 1);               // Start the ultrasound signal
+        //   Serial.println("ultrasound should be triggered");
+        // } else {
+        //   ledcWrite(SQUARE_WAVE_PIN, 0);               // Stop the ultrasound signal
+        //   Serial.println("ultrasound should be off");
+        // }
       } else {
         disconnectedWhileOn = false;
       }
@@ -102,16 +102,17 @@ void setup() {
   
   Serial.println("BLE device is advertising as ESP32_althea...");
 
-  pinMode(LED_POWER, OUTPUT);
+  // pinMode(LED_POWER, OUTPUT);
   pinMode(LED_CONNECT, OUTPUT);
   pinMode(LED_INPROGRESS, OUTPUT);
-  pinMode(SQUARE_WAVE_PIN, OUTPUT);
+  digitalWrite(RGB_BUILTIN, LOW);
+  // pinMode(SQUARE_WAVE_PIN, OUTPUT);
 
-  digitalWrite(LED_POWER, HIGH); // turn on LED to indicate power to device
-  ledcDetach(SQUARE_WAVE_PIN);
-  ledcAttach(SQUARE_WAVE_PIN, 1770000, 1);
+  // digitalWrite(LED_POWER, HIGH); // turn on LED to indicate power to device
+  // ledcDetach(SQUARE_WAVE_PIN);
+  // ledcAttach(SQUARE_WAVE_PIN, 1770000, 1);
 }
 
 void loop() {
-  delay(1000);
+  delay(500);
 }
